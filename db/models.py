@@ -1,7 +1,9 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float, create_engine, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
+from calendar import monthcalendar
+from collections import defaultdict
 
 Base = declarative_base()
 
@@ -64,6 +66,26 @@ class Task(Base):
             return self.percentage
         return 0
 
+    def get_status(self):
+        today = date.today()
+        if today < self.start_date:
+            return "예정"
+        elif today > self.end_date:
+            return "완료"
+        else:
+            return "진행 중"
+
+    def get_progress(self):
+        today = date.today()
+        if today < self.start_date:
+            return 0
+        elif today > self.end_date:
+            return 100
+        else:
+            total_days = (self.end_date - self.start_date).days
+            days_passed = (today - self.start_date).days
+            return min(100, int((days_passed / total_days) * 100))
+
 class Employee(Base):
     __tablename__ = 'employees'
 
@@ -88,6 +110,46 @@ class Allocation(Base):
     percentage = Column(Float, nullable=False)
     task = relationship('Task', back_populates='allocations')
     employee = relationship('Employee', back_populates='allocations')
+
+class Calendar:
+    @staticmethod
+    def get_monthly_tasks(year, month, tasks):
+        cal = monthcalendar(year, month)
+        task_calendar = defaultdict(list)
+
+        for task in tasks:
+            start = max(task.start_date, date(year, month, 1))
+            end = min(task.end_date, date(year, month, cal[-1][-1]))
+
+            current = start
+            while current <= end:
+                task_calendar[current.day].append(task)
+                current += timedelta(days=1)
+
+        return cal, task_calendar
+
+    @staticmethod
+    def print_monthly_calendar(year, month, tasks):
+        cal, task_calendar = Calendar.get_monthly_tasks(year, month, tasks)
+        print(f"{year}년 {month}월")
+        print("월 화 수 목 금 토 일")
+        for week in cal:
+            for day in week:
+                if day == 0:
+                    print("   ", end="")
+                else:
+                    print(f"{day:2d}", end="")
+                    if day in task_calendar:
+                        print("*", end="")
+                    else:
+                        print(" ", end="")
+            print()
+        
+        print("\n작업 목록:")
+        for day, day_tasks in task_calendar.items():
+            print(f"{day}일:")
+            for task in day_tasks:
+                print(f"  - {task.name} ({task.get_status()}, 진행률: {task.get_progress()}%)")
 
 def init_db():
     engine = create_engine('sqlite:///projects.db')
