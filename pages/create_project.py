@@ -15,6 +15,11 @@ def add_category():
     st.session_state['category_count'] += 1
     st.session_state['categories'].append({'name': '', 'percentage': 0, 'items': [{'name': '', 'percentage': 0}]})
 
+def remove_category(index):
+    if st.session_state['category_count'] > 1:
+        st.session_state['category_count'] -= 1
+        st.session_state['categories'].pop(index)
+
 def add_item(category_index):
     st.session_state['categories'][category_index]['items'].append({'name': '', 'percentage': 0})
 
@@ -48,10 +53,15 @@ with st.form("project_creation_form"):
                     st.session_state['categories'][c]['name'] = category_name
                     st.session_state['categories'][c]['percentage'] = category_percentage
 
+                st.button("카테고리 삭제", on_click=remove_category, args=(c,))
+
+    total_percentage = sum(category['percentage'] for category in st.session_state['categories'])
+    remaining_percentage = 100 - total_percentage
+    st.write(f"현재 비중 합계: {total_percentage}%, 남은 비중: {remaining_percentage}%")
+
     submitted = st.form_submit_button("카테고리 설정 완료")
 
 if submitted:
-    total_percentage = sum(category['percentage'] for category in st.session_state['categories'])
     if total_percentage != 100:
         st.error('모든 카테고리의 비중 합계가 100%가 되어야 합니다.')
     else:
@@ -66,6 +76,9 @@ if submitted:
                 st.session_state['categories'][c]['items'][i]['percentage'] = item_percentage
 
             st.button("항목 추가하기", on_click=add_item, args=(c,))
+
+            if st.button(f"카테고리 {c + 1} 설정 완료"):
+                break
 
     if st.button("프로젝트 생성"):
         if not project_name or not manager:
