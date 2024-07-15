@@ -6,10 +6,13 @@ from datetime import date
 st.title('프로젝트 생성하기')
 
 if 'category_count' not in st.session_state:
-    st.session_state.category_count = 1
+    st.session_state['category_count'] = 1
 
 def add_category():
-    st.session_state.category_count += 1
+    if 'category_count' in st.session_state:
+        st.session_state['category_count'] += 1
+    else:
+        st.session_state['category_count'] = 2
 
 st.button("카테고리 추가", on_click=add_category)
 
