@@ -9,10 +9,7 @@ if 'category_count' not in st.session_state:
     st.session_state['category_count'] = 1
 
 def add_category():
-    if 'category_count' in st.session_state:
-        st.session_state['category_count'] += 1
-    else:
-        st.session_state['category_count'] = 2
+    st.session_state['category_count'] += 1
 
 st.button("카테고리 추가", on_click=add_category)
 
@@ -28,7 +25,7 @@ with st.form("project_creation_form"):
         end_date = st.date_input('프로젝트 종료일', key='end_date')
 
     st.header('R&R 카테고리')
-
+    
     categories = []
     category_columns = st.columns(st.session_state.category_count)
 
@@ -88,10 +85,10 @@ with st.form("project_creation_form"):
                     if role_name and role_percentage > 0 and task_total_percentage == 100:
                         roles.append({'name': role_name, 'percentage': role_percentage, 'tasks': tasks})
 
-            if total_percentage != 100:
-                st.warning('모든 역할의 비중 합계가 100%가 되어야 합니다.')
+                if total_percentage != 100:
+                    st.warning('모든 역할의 비중 합계가 100%가 되어야 합니다.')
 
-            categories.append({'roles': roles, 'total_percentage': total_percentage})
+                categories.append({'roles': roles, 'total_percentage': total_percentage})
 
     submitted = st.form_submit_button("프로젝트 생성")
 
