@@ -81,18 +81,18 @@ if submitted:
             if st.button(f"카테고리 {c + 1} 설정 완료"):
                 break
 
-if st.button("프로젝트 생성"):
-    if not project_name or not manager:
-        st.error('프로젝트 이름과 관리자는 필수 입력 항목입니다.')
-    elif start_date > end_date:
-        st.error('프로젝트 시작일이 종료일보다 늦을 수 없습니다.')
-    else:
-        new_project = Project(name=project_name, revenue=revenue, budget=budget, manager=manager, start_date=start_date, end_date=end_date)
-        add_instance(new_project)
-        
-        for category in st.session_state['categories']:
-            for item in category['items']:
-                new_role = Role(name=item['name'], percentage=item['percentage'], project_id=new_project.id)
-                add_instance(new_role)
+    if st.button("프로젝트 생성"):
+        if not project_name or not manager:
+            st.error('프로젝트 이름과 관리자는 필수 입력 항목입니다.')
+        elif start_date > end_date:
+            st.error('프로젝트 시작일이 종료일보다 늦을 수 없습니다.')
+        else:
+            new_project = Project(name=project_name, revenue=revenue, budget=budget, manager=manager, start_date=start_date, end_date=end_date)
+            add_instance(new_project)
+            
+            for category in st.session_state['categories']:
+                for item in category['items']:
+                    new_role = Role(name=item['name'], percentage=item['percentage'], project_id=new_project.id)
+                    add_instance(new_role)
 
-        st.success('프로젝트가 성공적으로 생성되었습니다!')
+            st.success('프로젝트가 성공적으로 생성되었습니다!')
