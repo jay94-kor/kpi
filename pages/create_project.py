@@ -11,6 +11,8 @@ if 'category_count' not in st.session_state:
 def add_category():
     st.session_state.category_count += 1
 
+st.button("카테고리 추가", on_click=add_category)
+
 with st.form("project_creation_form"):
     col1, col2 = st.columns(2)
     with col1:
@@ -86,8 +88,6 @@ with st.form("project_creation_form"):
                 st.warning('모든 역할의 비중 합계가 100%가 되어야 합니다.')
 
             categories.append({'roles': roles, 'total_percentage': total_percentage})
-
-    st.button("카테고리 추가", on_click=add_category)
 
     submitted = st.form_submit_button("프로젝트 생성")
 
