@@ -1,8 +1,13 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+import importlib
 
-st.set_page_config(layout="wide")
- 
+st.set_page_config(layout="wide", page_title="프로젝트 관리 시스템")
+
+def load_page(page_name):
+    module = importlib.import_module(f"pages.{page_name}")
+    module.main()
+
 with st.sidebar:
     st.title('프로젝트 관리 시스템')
     selected = option_menu(
@@ -13,9 +18,16 @@ with st.sidebar:
         default_index=0,
     )
 
-if selected == "프로젝트 생성":
-    from pages.create_project import *
-elif selected == "프로젝트 보기":
-    from pages.view_projects import *
-elif selected == "직원 관리":
-    from pages.employee_management import *
+page_mapping = {
+    "프로젝트 생성": "create_project",
+    "프로젝트 보기": "view_projects",
+    "직원 관리": "employee_management"
+}
+
+if selected in page_mapping:
+    load_page(page_mapping[selected])
+else:
+    st.error("선택한 페이지를 찾을 수 없습니다.")
+
+st.sidebar.markdown("---")
+st.sidebar.info("© 2023 프로젝트 관리 시스템")
