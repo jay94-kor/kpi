@@ -23,8 +23,9 @@ with st.form("project_creation_form"):
     roles = []
     total_percentage = 0
 
-    for i in range(role_count):
-        with st.expander(f"역할 {i + 1}", expanded=True):
+    columns = st.columns(role_count)
+    for i, col in enumerate(columns):
+        with col:
             role_name = st.text_input(f'역할 이름', key=f'role_name_{i}')
             role_percentage = st.number_input(f'비중 (%)', min_value=0, max_value=100, step=1, key=f'percentage_{i}')
             
@@ -35,38 +36,36 @@ with st.form("project_creation_form"):
 
             task_total_percentage = 0
             for j in range(task_count):
-                with st.expander(f"테스크 {j + 1}", expanded=True):
-                    task_name = st.text_input(f'테스크 이름', key=f'task_name_{i}_{j}')
-                    task_percentage = st.number_input(f'테스크 비중 (%)', min_value=0, max_value=100, step=1, key=f'task_percentage_{i}_{j}')
-                    task_start_date = st.date_input(f'시작일', key=f'start_date_{i}_{j}')
-                    task_end_date = st.date_input(f'마감일', key=f'end_date_{i}_{j}')
-                    
-                    task_total_percentage += task_percentage
-                    
-                    employees = []
-                    employee_list = get_employees()
-                    employee_names = [emp.name for emp in employee_list]
-                    selected_employees = st.multiselect('직원 선택', employee_names, key=f'employees_{i}_{j}')
-                    
-                    employee_total_percentage = 0
-                    for emp_name in selected_employees:
-                        emp = next(emp for emp in employee_list if emp.name == emp_name)
-                        employee_percentage = st.number_input(f'{emp_name} 투입률 (%)', min_value=0, max_value=100, step=1, key=f'employee_percentage_{i}_{j}_{emp.id}')
-                        employee_total_percentage += employee_percentage
-                        if employee_percentage > 0:
-                            employees.append({'name': emp_name, 'percentage': employee_percentage, 'id': emp.id})
+                task_name = st.text_input(f'테스크 이름', key=f'task_name_{i}_{j}')
+                task_percentage = st.number_input(f'테스크 비중 (%)', min_value=0, max_value=100, step=1, key=f'task_percentage_{i}_{j}')
+                task_start_date = st.date_input(f'시작일', key=f'start_date_{i}_{j}')
+                task_end_date = st.date_input(f'마감일', key=f'end_date_{i}_{j}')
+                
+                task_total_percentage += task_percentage
+                
+                employees = []
+                employee_list = get_employees()
+                employee_names = [emp.name for emp in employee_list]
+                selected_employees = st.multiselect('직원 선택', employee_names, key=f'employees_{i}_{j}')
+                
+                employee_total_percentage = 0
+                for emp_name in selected_employees:
+                    emp = next(emp for emp in employee_list if emp.name == emp_name)
+                    employee_percentage = st.number_input(f'{emp_name} 투입률 (%)', min_value=0, max_value=100, step=1, key=f'employee_percentage_{i}_{j}_{emp.id}')
+                    employee_total_percentage += employee_percentage
+                    if employee_percentage > 0:
+                        employees.append({'name': emp_name, 'percentage': employee_percentage, 'id': emp.id})
 
-                    if task_name and task_percentage > 0 and task_start_date <= task_end_date:
-                        tasks.append({
-                            'name': task_name, 
-                            'percentage': task_percentage, 
-                            'start_date': task_start_date,
-                            'end_date': task_end_date,
-                            'employees': employees
-                        })
-                    
-                    if employee_total_percentage != 100:
-                        st.warning(f'테스크 {j + 1}의 직원 투입률 합계가 100%가 되어야 합니다.')
+                if task_name and task_percentage > 0 and task_start_date <= task_end_date:
+                    tasks.append({
+                        'name': task_name, 
+                        'percentage': task_percentage, 
+                        'start_date': task_start_date,
+                        'end_date': task_end_date,
+                        'employees': employees
+                    })
+                if employee_total_percentage != 100:
+                    st.warning(f'테스크 {j + 1}의 직원 투입률 합계가 100%가 되어야 합니다.')
 
             if task_total_percentage != 100:
                 st.warning(f'역할 {i + 1}의 테스크 비중 합계가 100%가 되어야 합니다.')
