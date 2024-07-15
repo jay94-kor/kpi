@@ -5,8 +5,17 @@ import importlib
 st.set_page_config(layout="wide", page_title="프로젝트 관리 시스템")
 
 def load_page(page_name):
-    module = importlib.import_module(f"pages.{page_name}")
-    module.main()
+    try:
+        with st.spinner(f"{page_name} 페이지를 로딩 중입니다..."):
+            module = importlib.import_module(f"pages.{page_name}")
+            module.main()
+    except ImportError:
+        st.error(f"{page_name} 페이지를 찾을 수 없습니다.")
+    except Exception as e:
+        st.error(f"페이지 로딩 중 오류가 발생했습니다: {str(e)}")
+
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = "프로젝트 생성"
 
 with st.sidebar:
     st.title('프로젝트 관리 시스템')
@@ -15,8 +24,12 @@ with st.sidebar:
         options=["프로젝트 생성", "프로젝트 보기", "직원 관리"],
         icons=["plus-circle", "list-task", "people"],
         menu_icon="cast",
-        default_index=0,
+        default_index=["프로젝트 생성", "프로젝트 보기", "직원 관리"].index(st.session_state.current_page),
     )
+
+    if selected != st.session_state.current_page:
+        st.session_state.current_page = selected
+        st.experimental_rerun()
 
 page_mapping = {
     "프로젝트 생성": "create_project",
@@ -24,8 +37,8 @@ page_mapping = {
     "직원 관리": "employee_management"
 }
 
-if selected in page_mapping:
-    load_page(page_mapping[selected])
+if st.session_state.current_page in page_mapping:
+    load_page(page_mapping[st.session_state.current_page])
 else:
     st.error("선택한 페이지를 찾을 수 없습니다.")
 
