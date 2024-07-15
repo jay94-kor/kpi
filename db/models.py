@@ -17,6 +17,8 @@ class Project(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     manager = Column(String, nullable=False)
     roles = relationship('Role', back_populates='project')
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
 
 class Role(Base):
     __tablename__ = 'roles'
