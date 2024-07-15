@@ -28,18 +28,19 @@ with st.form("project_creation_form"):
         end_date = st.date_input('프로젝트 종료일', key='end_date')
 
     st.header('R&R 카테고리')
-    
-    categories = []
-    for c in range(st.session_state.category_count):
-        with st.expander(f"카테고리 {c + 1}", expanded=True):
-            role_count = st.number_input(f'역할 수 (카테고리 {c + 1})', min_value=1, max_value=10, value=1, step=1, key=f'role_count_{c}')
-            
-            roles = []
-            total_percentage = 0
 
-            columns = st.columns(role_count)
-            for i, col in enumerate(columns):
-                with col:
+    categories = []
+    category_columns = st.columns(st.session_state.category_count)
+
+    for c, category_col in enumerate(category_columns):
+        with category_col:
+            with st.expander(f"카테고리 {c + 1}", expanded=True):
+                role_count = st.number_input(f'역할 수 (카테고리 {c + 1})', min_value=1, max_value=10, value=1, step=1, key=f'role_count_{c}')
+                
+                roles = []
+                total_percentage = 0
+
+                for i in range(role_count):
                     role_name = st.text_input(f'역할 이름', key=f'role_name_{c}_{i}')
                     role_percentage = st.number_input(f'비중 (%)', min_value=0, max_value=100, step=1, key=f'percentage_{c}_{i}')
                     
