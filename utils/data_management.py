@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine, Column, Integer, String, Float, Table, MetaData
 from sqlalchemy.orm import sessionmaker
+import os
 
-DATABASE_URL = "sqlite:///data/database.db"
+DATABASE_URL = "sqlite:///./data/database.db"
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -25,4 +26,6 @@ employees_table = Table(
 )
 
 def init_db():
+    db_dir = os.path.dirname(DATABASE_URL.replace("sqlite:///", ""))
+    os.makedirs(db_dir, exist_ok=True)
     metadata.create_all(bind=engine)
