@@ -6,13 +6,14 @@ from datetime import date
 st.title('프로젝트 생성하기')
 
 if 'category_count' not in st.session_state:
-    st.session_state['category_count'] = 1
+    st.session_state['category_count'] = 2
 
 if 'categories' not in st.session_state:
-    st.session_state['categories'] = []
+    st.session_state['categories'] = [{'name': '', 'percentage': 0, 'items': [{'name': '', 'percentage': 0}]} for _ in range(st.session_state['category_count'])]
 
 def add_category():
     st.session_state['category_count'] += 1
+    st.session_state['categories'].append({'name': '', 'percentage': 0, 'items': [{'name': '', 'percentage': 0}]})
 
 def add_item(category_index):
     st.session_state['categories'][category_index]['items'].append({'name': '', 'percentage': 0})
