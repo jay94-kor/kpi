@@ -2,7 +2,7 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 
 st.set_page_config(layout="wide")
-
+ 
 with st.sidebar:
     st.title('프로젝트 관리 시스템')
     selected = option_menu(
