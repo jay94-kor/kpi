@@ -68,25 +68,27 @@ class Task(Base):
             return self.percentage
         return 0
 
+    def calculate_progress(self):
+        total_days = (self.end_date - self.start_date).days
+        days_passed = (date.today() - self.start_date).days
+        if days_passed < 0:
+            return 0
+        elif days_passed > total_days:
+            return 100
+        else:
+            return int((days_passed / total_days) * 100)
+
+    def get_progress(self):
+        return self.calculate_progress()
+
     def get_status(self):
-        today = date.today()
-        if today < self.start_date:
-            return "예정"
-        elif today > self.end_date:
+        progress = self.calculate_progress()
+        if progress == 0:
+            return "시작 전"
+        elif progress == 100:
             return "완료"
         else:
             return "진행 중"
-
-    def get_progress(self):
-        today = date.today()
-        if today < self.start_date:
-            return 0
-        elif today > self.end_date:
-            return 100
-        else:
-            total_days = (self.end_date - self.start_date).days
-            days_passed = (today - self.start_date).days
-            return min(100, int((days_passed / total_days) * 100))
 
 class Employee(Base):
     __tablename__ = 'employees'

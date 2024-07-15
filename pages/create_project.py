@@ -9,11 +9,11 @@ if 'category_count' not in st.session_state:
     st.session_state['category_count'] = 2
 
 if 'categories' not in st.session_state:
-    st.session_state['categories'] = [{'name': '', 'percentage': 0, 'items': [{'name': '', 'percentage': 0}]} for _ in range(st.session_state['category_count'])]
+    st.session_state['categories'] = [{'name': '', 'percentage': 0, 'items': []} for _ in range(st.session_state['category_count'])]
 
 def add_category():
     st.session_state['category_count'] += 1
-    st.session_state['categories'].append({'name': '', 'percentage': 0, 'items': [{'name': '', 'percentage': 0}]})
+    st.session_state['categories'].append({'name': '', 'percentage': 0, 'items': []})
 
 def remove_category(index):
     if st.session_state['category_count'] > 1:
@@ -22,8 +22,6 @@ def remove_category(index):
 
 def add_item(category_index):
     st.session_state['categories'][category_index]['items'].append({'name': '', 'percentage': 0})
-
-st.button("카테고리 추가", on_click=add_category)
 
 with st.form("project_creation_form"):
     col1, col2 = st.columns(2)
@@ -38,20 +36,20 @@ with st.form("project_creation_form"):
 
     st.header('R&R 카테고리')
 
-    categories = []
-    category_columns = st.columns(st.session_state.category_count)
-
-    for c, category_col in enumerate(category_columns):
-        with category_col:
-            with st.expander(f"카테고리 {c + 1}", expanded=True):
-                category_name = st.text_input(f'카테고리 이름', key=f'category_name_{c}')
-                category_percentage = st.number_input(f'카테고리 비중 (%)', min_value=0, max_value=100, step=1, key=f'category_percentage_{c}')
-                
-                if len(st.session_state['categories']) <= c:
-                    st.session_state['categories'].append({'name': category_name, 'percentage': category_percentage, 'items': [{'name': '', 'percentage': 0}]})
-                else:
-                    st.session_state['categories'][c]['name'] = category_name
-                    st.session_state['categories'][c]['percentage'] = category_percentage
+    for c, category in enumerate(st.session_state['categories']):
+        with st.expander(f"카테고리 {c + 1}", expanded=True):
+            category['name'] = st.text_input(f'카테고리 이름', value=category['name'], key=f'category_name_{c}')
+            category['percentage'] = st.number_input(f'카테고리 비중 (%)', min_value=0, max_value=100, value=category['percentage'], step=1, key=f'category_percentage_{c}')
+            
+            st.subheader('항목')
+            for i, item in enumerate(category['items']):
+                col1, col2, col3 = st.columns([3, 2, 1])
+                with col1:
+                    item['name'] = st.text_input('항목 이름', value=item['name'], key=f'item_name_{c}_{i}')
+                with col2:
+                    item['percentage'] = st.number_input(f'항목 비중 (%)', min_value=0, max_value=100, value=item['percentage'], step=1, key=f'item_percentage_{c}_{i}')
+                with col3:
+                    st.button("항목 삭제", on_click=remove_item, args=(c, i), key=f"delete_item_{c}_{i}")
 
     total_percentage = sum(category['percentage'] for category in st.session_state['categories'])
     remaining_percentage = 100 - total_percentage
@@ -71,15 +69,7 @@ if submitted:
         for c, category in enumerate(st.session_state['categories']):
             st.header(f"카테고리 {c + 1}: {category['name']} ({category['percentage']}%)")
             for i, item in enumerate(category['items']):
-                item_name = st.text_input(f'항목 이름', key=f'item_name_{c}_{i}')
-                item_percentage = st.number_input(f'항목 비중 (%)', min_value=0, max_value=100, step=1, key=f'item_percentage_{c}_{i}')
-                st.session_state['categories'][c]['items'][i]['name'] = item_name
-                st.session_state['categories'][c]['items'][i]['percentage'] = item_percentage
-
-            st.button("항목 추가하기", on_click=add_item, args=(c,))
-
-            if st.button(f"카테고리 {c + 1} 설정 완료"):
-                break
+                st.write(f"항목: {item['name']} ({item['percentage']}%)")
 
 if st.button("프로젝트 생성"):
     if not project_name or not manager:
