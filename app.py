@@ -8,7 +8,10 @@ def load_page(page_name):
     try:
         with st.spinner(f"{page_name} 페이지를 로딩 중입니다..."):
             module = importlib.import_module(f"pages.{page_name}")
-            module.main()
+            if hasattr(module, 'main'):
+                module.main()
+            else:
+                st.error(f"{page_name} 페이지에 main() 함수가 정의되어 있지 않습니다.")
     except ImportError:
         st.error(f"{page_name} 페이지를 찾을 수 없습니다.")
     except Exception as e:
@@ -43,4 +46,4 @@ else:
     st.error("선택한 페이지를 찾을 수 없습니다.")
 
 st.sidebar.markdown("---")
-st.sidebar.info("© 2023 프로젝트 관리 시스템")
+st.sidebar.info("© 2024 프로젝트 관리 시스템")
