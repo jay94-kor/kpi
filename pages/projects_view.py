@@ -57,14 +57,13 @@ def display():
         # 프로젝트 정보를 표시합니다
         for project_id, project_data in projects_data.items():
             st.subheader(f"프로젝트: {project_data['name']}")
-            st.write(f"비용: {project_data['cost']:,.0f}원, 예산: {project_data['budget']:,.0f}원, 마진: {project_data['margin']:,.0f}원")
             
             for category_id, category_data in project_data["categories"].items():
-                st.write(f"**{category_data['name']}**")
+                st.write(f"- {category_data['name']}")
                 for item_id, item_data in category_data["items"].items():
-                    st.write(f"- {item_data['name']}")
+                    st.write(f"  - {item_data['name']}")
                     for employee in item_data["employees"]:
-                        st.write(f"  - {employee['name']} (할당률: {employee['allocation_rate']*100:.1f}%)")
+                        st.write(f"    - {employee['name']} (할당률: {employee['allocation_rate']*100:.1f}%)")
             
             st.write("---")
 
