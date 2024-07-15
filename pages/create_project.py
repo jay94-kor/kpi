@@ -32,19 +32,22 @@ with st.form("project_creation_form"):
     for c, category_col in enumerate(category_columns):
         with category_col:
             with st.expander(f"카테고리 {c + 1}", expanded=True):
-                role_count = st.number_input(f'역할 수 (카테고리 {c + 1})', min_value=1, max_value=10, value=1, step=1, key=f'role_count_{c}')
+                category_name = st.text_input(f'카테고리 이름', key=f'category_name_{c}')
+                category_percentage = st.number_input(f'카테고리 비중 (%)', min_value=0, max_value=100, step=1, key=f'category_percentage_{c}')
                 
-                roles = []
+                items = []
                 total_percentage = 0
 
-                for i in range(role_count):
-                    role_name = st.text_input(f'역할 이름', key=f'role_name_{c}_{i}')
-                    role_percentage = st.number_input(f'비중 (%)', min_value=0, max_value=100, step=1, key=f'percentage_{c}_{i}')
+                item_count = st.number_input(f'항목 수 (카테고리 {c + 1})', min_value=1, max_value=10, value=1, step=1, key=f'item_count_{c}')
+
+                for i in range(item_count):
+                    item_name = st.text_input(f'항목 이름', key=f'item_name_{c}_{i}')
+                    item_percentage = st.number_input(f'항목 비중 (%)', min_value=0, max_value=100, step=1, key=f'item_percentage_{c}_{i}')
                     
-                    total_percentage += role_percentage
+                    total_percentage += item_percentage
                     tasks = []
 
-                    task_count = st.number_input(f'테스크 수 (역할 {i + 1})', min_value=1, max_value=10, value=1, step=1, key=f'task_count_{c}_{i}')
+                    task_count = st.number_input(f'테스크 수 (항목 {i + 1})', min_value=1, max_value=10, value=1, step=1, key=f'task_count_{c}_{i}')
 
                     task_total_percentage = 0
                     for j in range(task_count):
@@ -80,15 +83,15 @@ with st.form("project_creation_form"):
                             st.warning(f'테스크 {j + 1}의 직원 투입률 합계가 100%가 되어야 합니다.')
 
                     if task_total_percentage != 100:
-                        st.warning(f'역할 {i + 1}의 테스크 비중 합계가 100%가 되어야 합니다.')
+                        st.warning(f'항목 {i + 1}의 테스크 비중 합계가 100%가 되어야 합니다.')
 
-                    if role_name and role_percentage > 0 and task_total_percentage == 100:
-                        roles.append({'name': role_name, 'percentage': role_percentage, 'tasks': tasks})
+                    if item_name and item_percentage > 0 and task_total_percentage == 100:
+                        items.append({'name': item_name, 'percentage': item_percentage, 'tasks': tasks})
 
                 if total_percentage != 100:
-                    st.warning('모든 역할의 비중 합계가 100%가 되어야 합니다.')
+                    st.warning('모든 항목의 비중 합계가 100%가 되어야 합니다.')
 
-                categories.append({'roles': roles, 'total_percentage': total_percentage})
+                categories.append({'name': category_name, 'percentage': category_percentage, 'items': items, 'total_percentage': total_percentage})
 
     submitted = st.form_submit_button("프로젝트 생성")
 
@@ -98,19 +101,19 @@ with st.form("project_creation_form"):
         elif start_date > end_date:
             st.error('프로젝트 시작일이 종료일보다 늦을 수 없습니다.')
         elif any(category['total_percentage'] != 100 for category in categories):
-            st.error('모든 카테고리의 역할 비중의 합이 100%가 되어야 합니다.')
-        elif any(any(not role['tasks'] for role in category['roles']) for category in categories):
-            st.error('모든 역할에는 최소 하나의 테스크가 있어야 합니다.')
+            st.error('모든 카테고리의 항목 비중의 합이 100%가 되어야 합니다.')
+        elif any(any(not item['tasks'] for item in category['items']) for category in categories):
+            st.error('모든 항목에는 최소 하나의 테스크가 있어야 합니다.')
         else:
             new_project = Project(name=project_name, revenue=revenue, budget=budget, manager=manager, start_date=start_date, end_date=end_date)
             add_instance(new_project)
             
             for category in categories:
-                for role in category['roles']:
-                    new_role = Role(name=role['name'], percentage=role['percentage'], project_id=new_project.id)
+                for item in category['items']:
+                    new_role = Role(name=item['name'], percentage=item['percentage'], project_id=new_project.id)
                     add_instance(new_role)
                     
-                    for task in role['tasks']:
+                    for task in item['tasks']:
                         new_task = Task(
                             name=task['name'], 
                             percentage=task['percentage'], 
