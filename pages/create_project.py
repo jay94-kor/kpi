@@ -5,6 +5,12 @@ from datetime import date
 
 st.title('프로젝트 생성하기')
 
+if 'category_count' not in st.session_state:
+    st.session_state.category_count = 1
+
+def add_category():
+    st.session_state.category_count += 1
+
 with st.form("project_creation_form"):
     col1, col2 = st.columns(2)
     with col1:
@@ -18,10 +24,8 @@ with st.form("project_creation_form"):
 
     st.header('R&R 카테고리')
     
-    category_count = st.number_input('카테고리 수', min_value=1, max_value=10, value=1, step=1, key='category_count')
-    
     categories = []
-    for c in range(category_count):
+    for c in range(st.session_state.category_count):
         with st.expander(f"카테고리 {c + 1}", expanded=True):
             role_count = st.number_input(f'역할 수 (카테고리 {c + 1})', min_value=1, max_value=10, value=1, step=1, key=f'role_count_{c}')
             
@@ -82,6 +86,8 @@ with st.form("project_creation_form"):
                 st.warning('모든 역할의 비중 합계가 100%가 되어야 합니다.')
 
             categories.append({'roles': roles, 'total_percentage': total_percentage})
+
+    st.button("카테고리 추가", on_click=add_category)
 
     submitted = st.form_submit_button("프로젝트 생성")
 
