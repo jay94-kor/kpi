@@ -8,8 +8,14 @@ st.title('프로젝트 생성하기')
 if 'category_count' not in st.session_state:
     st.session_state['category_count'] = 1
 
+if 'categories' not in st.session_state:
+    st.session_state['categories'] = []
+
 def add_category():
     st.session_state['category_count'] += 1
+
+def add_item(category_index):
+    st.session_state['categories'][category_index]['items'].append({'name': '', 'percentage': 0})
 
 st.button("카테고리 추가", on_click=add_category)
 
@@ -25,7 +31,7 @@ with st.form("project_creation_form"):
         end_date = st.date_input('프로젝트 종료일', key='end_date')
 
     st.header('R&R 카테고리')
-    
+
     categories = []
     category_columns = st.columns(st.session_state.category_count)
 
@@ -35,96 +41,43 @@ with st.form("project_creation_form"):
                 category_name = st.text_input(f'카테고리 이름', key=f'category_name_{c}')
                 category_percentage = st.number_input(f'카테고리 비중 (%)', min_value=0, max_value=100, step=1, key=f'category_percentage_{c}')
                 
-                items = []
-                total_percentage = 0
+                if len(st.session_state['categories']) <= c:
+                    st.session_state['categories'].append({'name': category_name, 'percentage': category_percentage, 'items': [{'name': '', 'percentage': 0}]})
+                else:
+                    st.session_state['categories'][c]['name'] = category_name
+                    st.session_state['categories'][c]['percentage'] = category_percentage
 
-                item_count = st.number_input(f'항목 수 (카테고리 {c + 1})', min_value=1, max_value=10, value=1, step=1, key=f'item_count_{c}')
+    submitted = st.form_submit_button("카테고리 설정 완료")
 
-                for i in range(item_count):
-                    item_name = st.text_input(f'항목 이름', key=f'item_name_{c}_{i}')
-                    item_percentage = st.number_input(f'항목 비중 (%)', min_value=0, max_value=100, step=1, key=f'item_percentage_{c}_{i}')
-                    
-                    total_percentage += item_percentage
-                    tasks = []
+if submitted:
+    total_percentage = sum(category['percentage'] for category in st.session_state['categories'])
+    if total_percentage != 100:
+        st.error('모든 카테고리의 비중 합계가 100%가 되어야 합니다.')
+    else:
+        st.success('카테고리 설정이 완료되었습니다. 이제 항목을 추가하세요.')
 
-                    task_count = st.number_input(f'테스크 수 (항목 {i + 1})', min_value=1, max_value=10, value=1, step=1, key=f'task_count_{c}_{i}')
+        for c, category in enumerate(st.session_state['categories']):
+            st.header(f"카테고리 {c + 1}: {category['name']} ({category['percentage']}%)")
+            for i, item in enumerate(category['items']):
+                item_name = st.text_input(f'항목 이름', key=f'item_name_{c}_{i}')
+                item_percentage = st.number_input(f'항목 비중 (%)', min_value=0, max_value=100, step=1, key=f'item_percentage_{c}_{i}')
+                st.session_state['categories'][c]['items'][i]['name'] = item_name
+                st.session_state['categories'][c]['items'][i]['percentage'] = item_percentage
 
-                    task_total_percentage = 0
-                    for j in range(task_count):
-                        task_name = st.text_input(f'테스크 이름', key=f'task_name_{c}_{i}_{j}')
-                        task_percentage = st.number_input(f'테스크 비중 (%)', min_value=0, max_value=100, step=1, key=f'task_percentage_{c}_{i}_{j}')
-                        task_start_date = st.date_input(f'시작일', key=f'start_date_{c}_{i}_{j}')
-                        task_end_date = st.date_input(f'마감일', key=f'end_date_{c}_{i}_{j}')
-                        
-                        task_total_percentage += task_percentage
-                        
-                        employees = []
-                        employee_list = get_employees()
-                        employee_names = [emp.name for emp in employee_list]
-                        selected_employees = st.multiselect('직원 선택', employee_names, key=f'employees_{c}_{i}_{j}')
-                        
-                        employee_total_percentage = 0
-                        for emp_name in selected_employees:
-                            emp = next(emp for emp in employee_list if emp.name == emp_name)
-                            employee_percentage = st.number_input(f'{emp_name} 투입률 (%)', min_value=0, max_value=100, step=1, key=f'employee_percentage_{c}_{i}_{j}_{emp.id}')
-                            employee_total_percentage += employee_percentage
-                            if employee_percentage > 0:
-                                employees.append({'name': emp_name, 'percentage': employee_percentage, 'id': emp.id})
+            st.button("항목 추가하기", on_click=add_item, args=(c,))
 
-                        if task_name and task_percentage > 0 and task_start_date <= task_end_date:
-                            tasks.append({
-                                'name': task_name, 
-                                'percentage': task_percentage, 
-                                'start_date': task_start_date,
-                                'end_date': task_end_date,
-                                'employees': employees
-                            })
-                        if employee_total_percentage != 100:
-                            st.warning(f'테스크 {j + 1}의 직원 투입률 합계가 100%가 되어야 합니다.')
-
-                    if task_total_percentage != 100:
-                        st.warning(f'항목 {i + 1}의 테스크 비중 합계가 100%가 되어야 합니다.')
-
-                    if item_name and item_percentage > 0 and task_total_percentage == 100:
-                        items.append({'name': item_name, 'percentage': item_percentage, 'tasks': tasks})
-
-                if total_percentage != 100:
-                    st.warning('모든 항목의 비중 합계가 100%가 되어야 합니다.')
-
-                categories.append({'name': category_name, 'percentage': category_percentage, 'items': items, 'total_percentage': total_percentage})
-
-    submitted = st.form_submit_button("프로젝트 생성")
-
-    if submitted:
+    if st.button("프로젝트 생성"):
         if not project_name or not manager:
             st.error('프로젝트 이름과 관리자는 필수 입력 항목입니다.')
         elif start_date > end_date:
             st.error('프로젝트 시작일이 종료일보다 늦을 수 없습니다.')
-        elif any(category['total_percentage'] != 100 for category in categories):
-            st.error('모든 카테고리의 항목 비중의 합이 100%가 되어야 합니다.')
-        elif any(any(not item['tasks'] for item in category['items']) for category in categories):
-            st.error('모든 항목에는 최소 하나의 테스크가 있어야 합니다.')
         else:
             new_project = Project(name=project_name, revenue=revenue, budget=budget, manager=manager, start_date=start_date, end_date=end_date)
             add_instance(new_project)
             
-            for category in categories:
+            for category in st.session_state['categories']:
                 for item in category['items']:
                     new_role = Role(name=item['name'], percentage=item['percentage'], project_id=new_project.id)
                     add_instance(new_role)
-                    
-                    for task in item['tasks']:
-                        new_task = Task(
-                            name=task['name'], 
-                            percentage=task['percentage'], 
-                            role_id=new_role.id,
-                            start_date=task['start_date'],
-                            end_date=task['end_date']
-                        )
-                        add_instance(new_task)
-                        
-                        for employee in task['employees']:
-                            new_allocation = Allocation(task_id=new_task.id, employee_id=employee['id'], percentage=employee['percentage'])
-                            add_instance(new_allocation)
 
             st.success('프로젝트가 성공적으로 생성되었습니다!')
