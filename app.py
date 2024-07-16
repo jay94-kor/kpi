@@ -17,6 +17,12 @@ def load_page(page_name):
     except Exception as e:
         st.error(f"페이지 로딩 중 오류가 발생했습니다: {str(e)}")
 
+page_mapping = {
+    "프로젝트 생성": "create_project",
+    "프로젝트 보기": "view_projects",
+    "직원 관리": "employee_management"
+}
+
 if 'current_page' not in st.session_state:
     st.session_state.current_page = "프로젝트 생성"
 
@@ -24,21 +30,14 @@ with st.sidebar:
     st.title('프로젝트 관리 시스템')
     selected = option_menu(
         menu_title=None,
-        options=["프로젝트 생성", "프로젝트 보기", "직원 관리"],
+        options=list(page_mapping.keys()),
         icons=["plus-circle", "list-task", "people"],
         menu_icon="cast",
-        default_index=["프로젝트 생성", "프로젝트 보기", "직원 관리"].index(st.session_state.current_page),
+        default_index=list(page_mapping.keys()).index(st.session_state.current_page),
     )
 
     if selected != st.session_state.current_page:
         st.session_state.current_page = selected
-        st.rerun()
-
-page_mapping = {
-    "프로젝트 생성": "create_project",
-    "프로젝트 보기": "view_projects",
-    "직원 관리": "employee_management"
-}
 
 if st.session_state.current_page in page_mapping:
     load_page(page_mapping[st.session_state.current_page])
