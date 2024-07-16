@@ -32,7 +32,7 @@ with st.sidebar:
 
     if selected != st.session_state.current_page:
         st.session_state.current_page = selected
-        st.experimental_rerun()
+        st.rerun()
 
 page_mapping = {
     "프로젝트 생성": "create_project",
