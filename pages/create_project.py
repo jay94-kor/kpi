@@ -42,31 +42,19 @@ def main():
 
         for c, category in enumerate(st.session_state['categories']):
             with st.expander(f"카테고리 {c + 1}", expanded=True):
-                col1, col2, col3 = st.columns([3, 1, 1])
+                col1, col2 = st.columns([3, 1])
                 with col1:
                     category['name'] = st.text_input(f'카테고리 이름', value=category['name'], key=f'category_name_{c}')
                 with col2:
                     category['percentage'] = st.number_input(f'카테고리 비중 (%)', min_value=0, max_value=100, value=category['percentage'], step=1, key=f'category_percentage_{c}')
-                with col3:
-                    if st.form_submit_button("카테고리 삭제", key=f"delete_category_{c}"):
-                        remove_category(c)
                 
                 st.subheader('항목')
                 for i, item in enumerate(category['items']):
-                    col1, col2, col3 = st.columns([3, 2, 1])
+                    col1, col2 = st.columns([3, 2])
                     with col1:
                         item['name'] = st.text_input('항목 이름', value=item['name'], key=f'item_name_{c}_{i}')
                     with col2:
                         item['percentage'] = st.number_input('항목 비중 (%)', min_value=0, max_value=100, value=item['percentage'], step=1, key=f'item_percentage_{c}_{i}')
-                    with col3:
-                        if st.form_submit_button("항목 삭제", key=f"delete_item_{c}_{i}"):
-                            remove_item(c, i)
-                
-                if st.form_submit_button("항목 추가", key=f"add_item_{c}"):
-                    add_item(c)
-
-        if st.form_submit_button("카테고리 추가"):
-            add_category()
 
         submitted = st.form_submit_button("프로젝트 생성")
 
@@ -96,6 +84,20 @@ def main():
                 
                 st.session_state['categories'] = [{'name': '', 'percentage': 0, 'items': []} for _ in range(2)]
                 st.session_state['category_count'] = 2
+
+    if st.button("카테고리 추가"):
+        add_category()
+
+    for c, category in enumerate(st.session_state['categories']):
+        if st.button(f"카테고리 {c+1} 삭제"):
+            remove_category(c)
+        
+        for i, item in enumerate(category['items']):
+            if st.button(f"항목 삭제 (카테고리 {c+1}, 항목 {i+1})"):
+                remove_item(c, i)
+        
+        if st.button(f"항목 추가 (카테고리 {c+1})"):
+            add_item(c)
 
 if __name__ == "__main__":
     main()
