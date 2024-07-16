@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from db.models import Base, Project, Role, Task, Employee, Allocation
 from datetime import date
+import random
 
 # 데이터베이스 초기화
 engine = create_engine('sqlite:///projects.db')
